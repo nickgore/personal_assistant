@@ -33,8 +33,9 @@ def google_calendar(update, context):
 def main():
     updater = Updater(API_TOKEN, use_context=True)
     dp = updater.dispatcher
-    dp.add_handler(CommandHandler('bop',bop))
+    dp.add_handler(CommandHandler('bop', bop))
     dp.add_handler(CommandHandler('events', google_calendar))
+    dp.add_handler(CommandHandler('bananas', google_calendar))
     updater.start_polling()
     updater.idle()
 

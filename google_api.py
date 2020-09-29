@@ -5,6 +5,9 @@ from __future__ import print_function
 import datetime
 import pickle
 import os.path
+
+import pandas as pd
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -42,11 +45,16 @@ def get_events():
     service = build('calendar', 'v3', credentials=creds)
 
     # Call the Calendar API
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    print('Getting the upcoming 10 events')
-    events_result = service.events().list(calendarId='primary', timeMin=now,
-                                        maxResults=10, singleEvents=True,
-                                        orderBy='startTime').execute()
+    # now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
+    today = pd.to_datetime(datetime.date.today()).isoformat() + 'Z'
+    timemax = (pd.to_datetime(datetime.date.today()) + datetime.timedelta(days=1)).isoformat() + 'Z'
+    print('Getting all events for today')
+    print(today, timemax)
+    events_result = service.events().list(
+        calendarId='primary', timeMin=today, timeMax=timemax,
+        maxResults=25, singleEvents=True,
+        orderBy='startTime',
+    ).execute()
     events = events_result.get('items', [])
 
     if not events:
@@ -55,5 +63,6 @@ def get_events():
     event_list = []
     for event in events:
         start = event['start'].get('dateTime', event['start'].get('date'))
-        event_list.append(event['summary'])
-    return ', '.join(event_list)
+        print(event)
+        event_list.append(start + ': ' + event['summary'])
+    return ', \n'.join(event_list)
